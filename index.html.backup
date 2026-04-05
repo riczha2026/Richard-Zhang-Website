@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CASE FILE: R. ZHANG</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- ====== INTRO SCREEN ====== -->
+  <div id="intro-screen" class="screen active">
+    <div class="intro-content">
+      <div class="case-label">CLASSIFIED DOSSIER</div>
+      <h1 class="intro-title">CASE FILE<br><span>R. ZHANG</span></h1>
+      <p class="intro-subtitle">Identity Verification Required</p>
+      <p class="intro-desc">
+        To access this classified portfolio, you must first verify your identity by solving the photo recognition puzzle.
+      </p>
+      <button class="btn-primary" onclick="startPuzzle()">START VERIFICATION</button>
+    </div>
+  </div>
+
+  <!-- ====== PUZZLE SCREEN ====== -->
+  <div id="puzzle-screen" class="screen">
+    <div class="puzzle-header">
+      <h2>Identity Verification</h2>
+      <p>Arrange the photo pieces to verify identity</p>
+    </div>
+    <div id="puzzle-container"></div>
+    <div class="puzzle-progress" id="puzzle-progress">0 / 9 pieces placed correctly</div>
+    <div class="puzzle-hint">Drag and drop pieces to rearrange them</div>
+  </div>
+
+  <!-- ====== MAIN SCREEN ====== -->
+  <div id="main-screen" class="screen">
+    <div class="dossier-header">
+      <div class="dossier-title">CASE FILE <span>R. ZHANG</span></div>
+      <div class="nav-tabs">
+        <button class="nav-tab active" id="tab-profile" onclick="tryTab('profile')">PROFILE</button>
+        <button class="nav-tab locked" id="tab-education" onclick="tryTab('education')">EDUCATION</button>
+        <button class="nav-tab locked" id="tab-experience" onclick="tryTab('experience')">EXPERIENCE</button>
+        <button class="nav-tab locked" id="tab-projects" onclick="tryTab('projects')">PROJECTS</button>
+        <button class="nav-tab locked" id="tab-skills" onclick="tryTab('skills')">SKILLS</button>
+      </div>
+    </div>
+    <div class="solve-progress" id="puzzle-progress-bar">
+      <div class="solve-progress-fill" id="solve-progress" style="width: 0%"></div>
+    </div>
+
+    <div class="case-content">
+      <!-- ====== PROFILE SECTION (ALWAYS VISIBLE) ====== -->
+      <div id="section-profile" class="case-section">
+        <div class="paperclip"></div>
+        <div class="section-header">
+          <div class="section-title">👤 IDENTITY DOSSIER</div>
+          <div class="section-badge">PUBLIC RECORD</div>
+        </div>
+        <div class="section-body">
+          <div class="profile-card">
+            <div class="profile-photo">
+              <img src="images/photo.jpg" alt="Profile Photo" onerror="this.style.display='none'">
+            </div>
+            <div class="profile-info">
+              <div class="case-number">CASE #RZ-2026</div>
+              <div class="info-row">
+                <span class="info-label">NAME:</span>
+                <span>Richard Zhang</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">TITLE:</span>
+                <span>Full Stack Developer</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">STATUS:</span>
+                <span>🟢 ACTIVE</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">LOCATION:</span>
+                <span>California, USA</span>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" style="margin-top: 20px;">
+            <div class="entry-title">Mission Brief</div>
+            <div class="entry-body">
+              Full-stack developer specialized in building dynamic web applications. Passionate about solving complex problems and creating intuitive user experiences. This portfolio demonstrates technical expertise across multiple domains.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== EDUCATION SECTION ====== -->
+      <div id="section-education" class="case-section">
+        <div class="paperclip"></div>
+        <div class="section-header">
+          <div class="section-title">🎓 EDUCATIONAL BACKGROUND</div>
+          <div class="section-badge" id="badge-education">CLASSIFIED</div>
+        </div>
+        <div class="section-body">
+          <!-- Puzzle Gate -->
+          <div id="gate-education" class="puzzle-gate">
+            <h3>🔒 RESTRICTED ACCESS</h3>
+            <p>Complete the cipher puzzle to decrypt this section</p>
+            <div style="margin-top: 20px; background: white; padding: 20px; border-radius: 4px;">
+              <div class="cipher-display" id="cipher-text">XQLYHUUVLWB RI FDOLIRUQLD VDQWD EDUEUDE</div>
+              <p style="font-family: 'Courier Prime', monospace; font-size: 12px; color: #6a5a3a; margin: 12px 0; text-align: center;">
+                🔐 Caesar Cipher (Shift +3): Decode this message
+              </p>
+              <input type="text" id="cipher-input" class="cipher-input" placeholder="Type your answer..." onkeypress="if(event.key==='Enter') checkCipher(this.value)">
+              <div style="text-align: center; margin-top: 8px; font-family: 'Courier Prime', monospace; font-size: 12px; color: #6a5a3a;">
+                Hint: It's a university name
+              </div>
+              <div id="cipher-feedback" style="margin-top: 12px; text-align: center; font-family: 'Courier Prime', monospace; font-size: 13px;"></div>
+            </div>
+          </div>
+
+          <!-- Content (hidden until unlocked) -->
+          <div id="content-education" style="display: none;">
+            <div class="entry-card">
+              <div class="entry-title">University of California, Santa Barbara</div>
+              <div class="entry-meta">2020 - 2024 | Bachelor of Science</div>
+              <div class="entry-body">
+                <strong>Major:</strong> Computer Science<br>
+                <strong>GPA:</strong> 3.8/4.0<br>
+                <strong>Relevant Coursework:</strong>
+                <ul>
+                  <li>Data Structures & Algorithms</li>
+                  <li>Web Development & Full Stack Applications</li>
+                  <li>Database Systems</li>
+                  <li>Software Engineering</li>
+                  <li>Machine Learning</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== EXPERIENCE SECTION ====== -->
+      <div id="section-experience" class="case-section">
+        <div class="paperclip"></div>
+        <div class="section-header">
+          <div class="section-title">💼 OPERATIONAL HISTORY</div>
+          <div class="section-badge" id="badge-experience">CLASSIFIED</div>
+        </div>
+        <div class="section-body">
+          <!-- Puzzle Gate -->
+          <div id="gate-experience" class="puzzle-gate">
+            <h3>🔒 RESTRICTED ACCESS</h3>
+            <p>Complete the Wordle puzzle to decrypt this section</p>
+            <div style="margin-top: 20px; background: white; padding: 20px; border-radius: 4px;">
+              <p style="font-family: 'Courier Prime', monospace; font-size: 12px; color: #6a5a3a; margin-bottom: 16px; text-align: center;">
+                Hint: What I do professionally (8 letters)
+              </p>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="wordle-input" class="cipher-input" placeholder="8-letter word" style="flex: 1;" maxlength="8">
+                <button class="btn-primary" id="wordle-submit" onclick="checkWordleGuess()" style="padding: 12px 24px; margin: 0;">GUESS</button>
+              </div>
+              <div id="wordle-history" style="margin-top: 16px;"></div>
+              <div id="wordle-feedback" style="margin-top: 12px; text-align: center; font-family: 'Courier Prime', monospace; font-size: 13px;"></div>
+            </div>
+          </div>
+
+          <!-- Content (hidden until unlocked) -->
+          <div id="content-experience" style="display: none;">
+            <div class="entry-card">
+              <div class="entry-title">Frontend Engineer</div>
+              <div class="entry-meta">2024 - Present | Tech Startup</div>
+              <div class="entry-body">
+                Developing interactive web applications using React and TypeScript. Collaborating with design and backend teams to deliver polished user experiences.
+                <div class="skill-tags">
+                  <span class="skill-tag">React</span>
+                  <span class="skill-tag">TypeScript</span>
+                  <span class="skill-tag">CSS</span>
+                  <span class="skill-tag">UI/UX</span>
+                </div>
+              </div>
+            </div>
+            <div class="entry-card">
+              <div class="entry-title">Full Stack Developer (Intern)</div>
+              <div class="entry-meta">2023 - 2024 | Web Development Agency</div>
+              <div class="entry-body">
+                Built complete web applications from scratch. Gained experience with databases, API design, and deployment pipelines.
+                <div class="skill-tags">
+                  <span class="skill-tag">Node.js</span>
+                  <span class="skill-tag">PostgreSQL</span>
+                  <span class="skill-tag">AWS</span>
+                  <span class="skill-tag">REST APIs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== PROJECTS SECTION ====== -->
+      <div id="section-projects" class="case-section">
+        <div class="paperclip"></div>
+        <div class="section-header">
+          <div class="section-title">🔍 CLASSIFIED OPERATIONS</div>
+          <div class="section-badge" id="badge-projects">CLASSIFIED</div>
+        </div>
+        <div class="section-body">
+          <!-- Puzzle Gate -->
+          <div id="gate-projects" class="puzzle-gate">
+            <h3>🔒 RESTRICTED ACCESS</h3>
+            <p>Find all 3 bugs in the code to decrypt this section</p>
+            <div style="margin-top: 20px; background: white; padding: 20px; border-radius: 4px;">
+              <div id="bug-code" style="background: #1a1208; padding: 12px; border: 1px solid #d4c4a0; margin-bottom: 12px; max-height: 300px; overflow-y: auto;"></div>
+              <div id="bug-feedback" style="text-align: center; font-family: 'Courier Prime', monospace; font-size: 13px; color: #6a5a3a;"></div>
+            </div>
+          </div>
+
+          <!-- Content (hidden until unlocked) -->
+          <div id="content-projects" style="display: none;">
+            <div class="entry-card">
+              <div class="entry-title">Detective's Case File Platform</div>
+              <div class="entry-meta">2024 | Personal Project</div>
+              <div class="entry-body">
+                An interactive portfolio disguised as a classified case file. Features interactive puzzles, draggable UI elements, and a detective theme. Built with vanilla JavaScript and CSS animations.
+                <div class="skill-tags">
+                  <span class="skill-tag">JavaScript</span>
+                  <span class="skill-tag">HTML/CSS</span>
+                  <span class="skill-tag">Canvas API</span>
+                  <span class="skill-tag">Animations</span>
+                </div>
+              </div>
+            </div>
+            <div class="entry-card">
+              <div class="entry-title">E-Commerce Platform</div>
+              <div class="entry-meta">2023 | Freelance Project</div>
+              <div class="entry-body">
+                Full-stack e-commerce solution with product catalog, shopping cart, and payment integration. Responsive design and optimized performance.
+                <div class="skill-tags">
+                  <span class="skill-tag">React</span>
+                  <span class="skill-tag">Node.js</span>
+                  <span class="skill-tag">Stripe API</span>
+                  <span class="skill-tag">MongoDB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SKILLS SECTION ====== -->
+      <div id="section-skills" class="case-section">
+        <div class="paperclip"></div>
+        <div class="section-header">
+          <div class="section-title">⚡ TECHNICAL ARSENAL</div>
+          <div class="section-badge" id="badge-skills">CLASSIFIED</div>
+        </div>
+        <div class="section-body">
+          <!-- Puzzle Gate -->
+          <div id="gate-skills" class="puzzle-gate">
+            <h3>🔒 RESTRICTED ACCESS</h3>
+            <p>Match all skill pairs to decrypt this section</p>
+            <div style="margin-top: 20px; background: white; padding: 20px; border-radius: 4px;">
+              <div id="memory-grid" class="memory-grid"></div>
+              <div id="memory-feedback" style="margin-top: 16px; text-align: center; font-family: 'Courier Prime', monospace; font-size: 13px; color: #6a5a3a;"></div>
+            </div>
+          </div>
+
+          <!-- Content (hidden until unlocked) -->
+          <div id="content-skills" style="display: none;">
+            <div class="entry-card">
+              <div class="entry-title">Frontend Technologies</div>
+              <div class="entry-body">
+                React, TypeScript, HTML5, CSS3, Vue.js, Angular, Responsive Design, Web Animation
+              </div>
+            </div>
+            <div class="entry-card">
+              <div class="entry-title">Backend & Databases</div>
+              <div class="entry-body">
+                Node.js, Express, Python, Django, PostgreSQL, MongoDB, Firebase, REST APIs
+              </div>
+            </div>
+            <div class="entry-card">
+              <div class="entry-title">Tools & Platforms</div>
+              <div class="entry-body">
+                Git, GitHub, Docker, AWS, Netlify, CI/CD Pipelines, webpack, npm/yarn
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== NOTIFICATION ====== -->
+  <div id="notification" class="notification"></div>
+
+  <!-- ====== SCRIPTS ====== -->
+  <script src="js/main.js"></script>
+  <script src="js/puzzle-photo.js"></script>
+  <script src="js/puzzle-cipher.js"></script>
+  <script src="js/puzzle-wordle.js"></script>
+  <script src="js/puzzle-bugs.js"></script>
+  <script src="js/puzzle-memory.js"></script>
+</body>
+</html><!-- Placeholder for now, will update properly -->
