@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHANG // Case File</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --paper: #f0e8d0;
+    --aged: #d4c4a0;
+    --red: #c0392b;
+    --gold: #b8860b;
+    --shadow: rgba(26,18,8,0.4);
+    --stamp: #8b1a1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ink);
+    font-family: 'Courier Prime', monospace;
+    color: var(--ink);
+    overflow-x: hidden;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%23c0392b'/%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%23c0392b' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, crosshair;
+  }
+
+  /* ====== GRAIN OVERLAY ====== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ====== SCREENS ====== */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ====== INTRO SCREEN ====== */
+  #intro-screen {
+    background: var(--ink);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #intro-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, #2d2010 0%, #0d0a05 70%);
+  }
+
+  .intro-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    animation: fadeInUp 1.2s ease forwards;
+  }
+
+  .case-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(10px, 1.5vw, 14px);
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+
+  .intro-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(50px, 10vw, 120px);
+    color: var(--paper);
+    line-height: 0.9;
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    letter-spacing: 0.05em;
+  }
+
+  .intro-title span { color: var(--red); }
+
+  .intro-subtitle {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(12px, 2vw, 18px);
+    color: var(--aged);
+    margin: 16px 0 40px;
+    letter-spacing: 0.1em;
+  }
+
+  .intro-desc {
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    color: #8a7a5a;
+    max-width: 400px;
+    line-height: 1.7;
+    margin: 0 auto 40px;
+    font-style: italic;
+  }
+
+  .btn-primary {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    padding: 14px 40px;
+    background: var(--red);
+    color: var(--paper);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .btn-primary:hover { background: #a93226; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(192,57,43,0.4); }
+
+  /* ====== PUZZLE SCREEN ====== */
+  #puzzle-screen {
+    background: #0d0a05;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+
+  .puzzle-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .puzzle-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    color: var(--paper);
+    letter-spacing: 0.1em;
+  }
+
+  .puzzle-header p {
+    font-family: 'Courier Prime', monospace;
+    color: #6a5a3a;
+    font-size: 13px;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  #puzzle-container {
+    display: grid;
+    gap: 3px;
+    background: #2a1f10;
+    padding: 3px;
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 40px rgba(184,134,11,0.2);
+    position: relative;
+  }
+
+  .puzzle-piece {
+    cursor: grab;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+    background: #1a1208;
+  }
+
+  .puzzle-piece:hover { transform: scale(1.04); z-index: 10; box-shadow: 0 4px 20px rgba(184,134,11,0.5); }
+  .puzzle-piece.dragging { opacity: 0.7; cursor: grabbing; transform: scale(1.1); z-index: 100; }
+  .puzzle-piece.correct { border: 2px solid var(--gold); }
+  .puzzle-piece.wrong { border: 2px solid var(--red); }
+
+  .puzzle-piece canvas { display: block; }
+
+  .puzzle-progress {
+    margin-top: 16px;
+    font-family: 'Courier Prime', monospace;
+    color: var(--gold);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .puzzle-hint {
+    margin-top: 8px;
+    font-family: 'Courier Prime', monospace;
+    color: #4a3a2a;
+    font-size: 11px;
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* ====== MAIN PORTFOLIO SCREEN ====== */
+  #main-screen {
+    background: var(--paper);
+    flex-direction: column;
+    padding: 0;
+    position: relative;
+  }
+
+  /* ====== DOSSIER HEADER ====== */
+  .dossier-header {
+    background: var(--ink);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 4px solid var(--red);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .dossier-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(20px, 4vw, 40px);
+    color: var(--paper);
+    letter-spacing: 0.1em;
+  }
+
+  .dossier-title span { color: var(--red); }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .nav-tab {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    padding: 8px 16px;
+    background: transparent;
+    color: #6a5a3a;
+    border: 1px solid #3a2a1a;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .nav-tab:hover, .nav-tab.active { background: var(--red); color: var(--paper); border-color: var(--red); }
+  .nav-tab.locked { color: #3a2a1a; cursor: not-allowed; }
+  .nav-tab.locked:hover { background: transparent; border-color: #3a2a1a; color: #3a2a1a; }
+
+  /* ====== CASE FILE CONTENT ====== */
+  .case-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    width: 100%;
+  }
+
+  /* ====== SECTION CARDS ====== */
+  .case-section {
+    background: var(--paper);
+    border: 2px solid var(--aged);
+    margin-bottom: 32px;
+    position: relative;
+    box-shadow: 4px 4px 0 var(--aged), 8px 8px 0 rgba(0,0,0,0.1);
+    display: none;
+  }
+
+  .case-section.visible { display: block; animation: revealSection 0.5s ease forwards; }
+
+  @keyframes revealSection {
+    from { opacity: 0; transform: translateY(20px) rotate(-0.5deg); }
+    to { opacity: 1; transform: translateY(0) rotate(0); }
+  }
+
+  .section-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.2em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-badge {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+
+  .section-body { padding: 24px; }
+
+  /* ====== LOCKED PUZZLE SECTION ====== */
+  .locked-overlay {
+    position: relative;
+  }
+
+  .puzzle-gate {
+    background: #f5ecd5;
+    border: 2px dashed var(--aged);
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 0;
+  }
+
+  .puzzle-gate h3 {
+    font-family: 'Special Elite', serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .puzzle-gate p {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    color: #6a5a3a;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  /* ====== MINI PUZZLES ====== */
+
+  /* Cipher Puzzle */
+  .cipher-display {
+    font-family: 'Courier Prime', monospace;
+    font-size: clamp(14px, 2.5vw, 20px);
+    letter-spacing: 0.2em;
+    color: var(--red);
+    background: #f5ecd5;
+    padding: 16px;
+    border: 1px solid var(--aged);
+    margin: 12px 0;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .cipher-input {
+    width: 100%;
+    font-family: 'Courier Prime', monospace;
+    font-size: 16px;
+    padding: 12px;
+    border: 2px solid var(--aged);
+    background: #faf6ec;
+    color: var(--ink);
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+  .cipher-input:focus { border-color: var(--gold); }
+
+  /* Timeline Drag */
+  .timeline-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .timeline-item {
+    background: #faf6ec;
+    border: 2px solid var(--aged);
+    padding: 12px 16px;
+    cursor: grab;
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .timeline-item:hover { border-color: var(--gold); background: #f0e8d0; }
+  .timeline-item.dragging { opacity: 0.5; cursor: grabbing; }
+  .timeline-item.over { border-color: var(--red); border-style: dashed; }
+  .timeline-item .drag-handle { color: var(--aged); font-size: 18px; }
+
+  /* Memory Match */
+  .memory-grid {
+    display: grid;
+    gap: 8px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .memory-card {
+    aspect-ratio: 1;
+    cursor: pointer;
+    position: relative;
+    perspective: 600px;
+  }
+
+  .memory-card-inner {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.4s;
+    transform-style: preserve-3d;
+    position: relative;
+  }
+
+  .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+  .memory-card.matched .memory-card-inner { transform: rotateY(180deg); }
+
+  .card-front, .card-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--aged);
+    font-size: clamp(18px, 3vw, 28px);
+  }
+
+  .card-front {
+    background: var(--ink);
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.1em;
+  }
+
+  .card-back {
+    background: #faf6ec;
+    transform: rotateY(180deg);
+    font-size: clamp(20px, 4vw, 32px);
+  }
+
+  .memory-card.matched .card-back { background: #e8f4e8; border-color: #4a8a4a; }
+
+  /* Code Crack */
+  .code-slots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 16px 0;
+  }
+
+  .code-slot {
+    width: 50px;
+    height: 60px;
+    border: 2px solid var(--aged);
+    background: #faf6ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    position: relative;
+  }
+
+  .code-slot:hover { border-color: var(--gold); background: #f0e8d0; }
+  .code-slot.correct-digit { border-color: #4a8a4a; background: #e8f4e8; }
+  .code-slot.wrong-digit { border-color: var(--red); background: #faeaea; }
+
+  .code-hint {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    color: #6a5a3a;
+    text-align: center;
+    font-style: italic;
+    margin: 8px 0;
+  }
+
+  /* ====== REVEALED CONTENT ====== */
+  .entry-card {
+    border-left: 3px solid var(--red);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    background: #faf6ec;
+    position: relative;
+  }
+
+  .entry-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -3px; bottom: 0;
+    width: 3px;
+    background: var(--red);
+  }
+
+  .entry-title {
+    font-family: 'Special Elite', serif;
+    font-size: 17px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .entry-meta {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .entry-body {
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    color: #3a2a1a;
+    line-height: 1.7;
+  }
+
+  .entry-body ul { padding-left: 16px; }
+  .entry-body li { margin-bottom: 6px; }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .skill-tag {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border: 1px solid var(--aged);
+    color: #5a4a2a;
+    background: var(--paper);
+  }
+
+  /* ====== REDACTED EFFECT ====== */
+  .redacted {
+    background: var(--ink);
+    color: transparent;
+    border-radius: 2px;
+    user-select: none;
+  }
+
+  /* ====== STAMP ====== */
+  .stamp {
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(20px, 4vw, 36px);
+    letter-spacing: 0.2em;
+    border: 4px solid var(--stamp);
+    color: var(--stamp);
+    padding: 6px 14px;
+    transform: rotate(-15deg);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  /* ====== PAPERCLIP DECORATION ====== */
+  .paperclip {
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    width: 20px;
+    height: 50px;
+    border: 3px solid #9a8a6a;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    transform: rotate(5deg);
+  }
+
+  /* ====== PROFILE CARD ====== */
+  .profile-card {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .profile-photo {
+    width: 120px;
+    height: 120px;
+    background: var(--aged);
+    border: 3px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--ink);
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 4px 4px 0 var(--ink);
+    overflow: hidden;
+  }
+
+  .profile-photo::after {
+    content: 'PHOTO';
+    position: absolute;
+    bottom: 4px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--shadow);
+  }
+
+  .profile-info .info-row {
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    margin-bottom: 6px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .info-label {
+    color: var(--gold);
+    font-weight: 700;
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  /* ====== PROGRESS BAR ====== */
+  .solve-progress {
+    background: #2a1f10;
+    height: 4px;
+    margin: 0;
+  }
+
+  .solve-progress-fill {
+    background: var(--gold);
+    height: 100%;
+    transition: width 0.5s ease;
+  }
+
+  /* ====== NOTIFICATION ====== */
+  .notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 20px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    border-left: 4px solid var(--gold);
+    z-index: 1000;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+  }
+
+  .notification.show { transform: translateX(0); }
+  .notification.error { border-color: var(--red); }
+  .notification.success { border-color: #4a8a4a; }
+
+  /* ====== TICKER ====== */
+  .case-ticker {
+    background: var(--red);
+    padding: 6px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .ticker-inner {
+    display: inline-block;
+    animation: ticker 30s linear infinite;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    color: var(--paper);
+    letter-spacing: 0.1em;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ====== SUCCESS FLASH ====== */
+  @keyframes successFlash {
+    0% { background: rgba(74,138,74,0.3); }
+    100% { background: transparent; }
+  }
+
+  .success-flash { animation: successFlash 1s ease forwards; }
+
+  /* ====== ANIMATIONS ====== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes typeIn {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  .typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid var(--gold);
+    animation: typeIn 2s steps(40) forwards, blink 0.7s step-end infinite;
+    max-width: fit-content;
+  }
+
+  @keyframes blink { 50% { border-color: transparent; } }
+
+  /* ====== CASE NUMBER ====== */
+  .case-number {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    color: #6a5a3a;
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+  }
+
+  /* ====== RESPONSIVE ====== */
+  @media (max-width: 600px) {
+    .dossier-header { padding: 12px 16px; flex-direction: column; gap: 12px; }
+    .case-content { padding: 20px 12px; }
+    .profile-card { flex-direction: column; }
+  }
+  
+  .success-banner {
+    background: #1a3a1a;
+    color: #a0d0a0;
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    padding: 12px 20px;
+    text-align: center;
+    border-top: 1px solid #4a8a4a;
+    display: none;
+  }
+
+  .wire-connector {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+
+  .wire-item {
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    padding: 10px 16px;
+    border: 2px solid var(--aged);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #faf6ec;
+    user-select: none;
+    min-width: 90px;
+    text-align: center;
+  }
+
+  .wire-item.selected { background: var(--red); color: var(--paper); border-color: var(--red); }
+  .wire-item.matched { background: #e8f4e8; border-color: #4a8a4a; color: #2a6a2a; pointer-events: none; }
+  .wire-item.wrong-flash { background: #faeaea; border-color: var(--red); }
+
+  .wire-col { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .wire-divider { font-family: 'Bebas Neue'; font-size: 24px; color: var(--aged); padding: 0 8px; }
+</style>
+</head>
+<body>
+
+<!-- ====== INTRO SCREEN ====== -->
+<div id="intro-screen" class="screen active">
+  <div class="intro-content">
+    <div class="case-label">⬛ CLASSIFIED DOSSIER // CASE #RZ-2026</div>
+    <div class="intro-title">ZHANG<br><span>RICHARD</span></div>
+    <div class="intro-subtitle">// Data Scientist · Statistician · Analyst //</div>
+    <div class="intro-desc">
+      "Every data point tells a story. Every pattern hides a truth.<br>
+      Are you ready to crack the case?"
+    </div>
+    <button class="btn-primary" onclick="startPuzzle()">OPEN CASE FILE</button>
+  </div>
+</div>
+
+<!-- ====== PUZZLE SCREEN ====== -->
+<div id="puzzle-screen" class="screen">
+  <div class="puzzle-header">
+    <div class="case-label">⬛ IDENTITY VERIFICATION // STEP 1 OF 1</div>
+    <h2>RECONSTRUCT THE SUBJECT</h2>
+    <p>Drag and drop the pieces to assemble the photo. Solve the puzzle to gain access.</p>
+  </div>
+  <div id="puzzle-container"></div>
+  <div class="puzzle-progress" id="puzzle-progress">0 / 9 pieces placed correctly</div>
+  <div class="puzzle-hint">💡 Drag each piece to its correct position in the grid</div>
+</div>
+
+<!-- ====== MAIN SCREEN ====== -->
+<div id="main-screen" class="screen">
+  <div class="solve-progress">
+    <div class="solve-progress-fill" id="solve-progress" style="width:0%"></div>
+  </div>
+  <div class="case-ticker">
+    <span class="ticker-inner">
+      &nbsp;&nbsp;&nbsp;// ACTIVE INVESTIGATION: RICHARD ZHANG — STATS & DATA SCIENCE — UCSB 2026 — PYTHON · R · SQL · ML — CASE STATUS: OPEN &nbsp;&nbsp;&nbsp;// ACTIVE INVESTIGATION: RICHARD ZHANG — STATS & DATA SCIENCE — UCSB 2026 — PYTHON · R · SQL · ML — CASE STATUS: OPEN &nbsp;&nbsp;&nbsp;
+    </span>
+  </div>
+  <div class="dossier-header">
+    <div>
+      <div class="case-number">CASE FILE #RZ-2026</div>
+      <div class="dossier-title">DOSSIER: <span>R. ZHANG</span></div>
+    </div>
+    <div class="nav-tabs" id="nav-tabs">
+      <button class="nav-tab active" onclick="showSection('profile')">PROFILE</button>
+      <button class="nav-tab locked" id="tab-education" onclick="tryTab('education')">🔒 EDUCATION</button>
+      <button class="nav-tab locked" id="tab-experience" onclick="tryTab('experience')">🔒 EXPERIENCE</button>
+      <button class="nav-tab locked" id="tab-projects" onclick="tryTab('projects')">🔒 PROJECTS</button>
+      <button class="nav-tab locked" id="tab-skills" onclick="tryTab('skills')">🔒 SKILLS</button>
+    </div>
+  </div>
+
+  <div class="case-content">
+
+    <!-- ====== PROFILE SECTION ====== -->
+    <div class="case-section visible" id="section-profile">
+      <div class="section-header">
+        <div class="section-title">
+          📁 SUBJECT PROFILE
+          <span class="section-badge">DECLASSIFIED</span>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="profile-card">
+          <div class="profile-photo">RZ</div>
+          <div class="profile-info">
+            <div class="info-row"><span class="info-label">NAME:</span> Richard Zhang</div>
+            <div class="info-row"><span class="info-label">LOCATION:</span> Newark, CA</div>
+            <div class="info-row"><span class="info-label">CONTACT:</span> (408) 888-1328</div>
+            <div class="info-row"><span class="info-label">EMAIL:</span> riczha200@gmail.com</div>
+            <div class="info-row"><span class="info-label">LINKEDIN:</span> richard-zhang200</div>
+            <div class="info-row"><span class="info-label">GITHUB:</span> riczha2026</div>
+            <div class="info-row"><span class="info-label">STATUS:</span> <span style="color:var(--red);font-weight:700;">SEEKING EMPLOYMENT — CLASS OF 2026</span></div>
+          </div>
+        </div>
+        <div style="margin-top:20px; padding-top:16px; border-top: 1px solid var(--aged);">
+          <p style="font-family:'Courier Prime',monospace; font-size:13px; color:#5a4a2a; line-height:1.8; font-style:italic;">
+            "Subject is a Statistics & Data Science major at UCSB with a 3.82 GPA. Demonstrated proficiency across the full data pipeline — from ETL and SQL to machine learning and visualization. Four puzzle files remain sealed. Solve each one to reveal classified intel."
+          </p>
+        </div>
+        <div style="margin-top:20px; background:#1a1208; padding:16px; color:var(--gold); font-family:'Courier Prime',monospace; font-size:12px; line-height:1.8;">
+          <strong style="color:var(--paper); font-family:'Bebas Neue',sans-serif; letter-spacing:0.2em;">MISSION BRIEFING:</strong><br>
+          Four case files are locked. Navigate to each tab and solve the puzzle to unlock the intelligence inside.<br>
+          <span style="color:#6a5a3a;">Current clearance: 0/4 files unlocked</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== EDUCATION SECTION ====== -->
+    <div class="case-section" id="section-education">
+      <div class="section-header">
+        <div class="section-title">
+          🎓 EDUCATION FILES
+          <span class="section-badge" id="badge-education">LOCKED</span>
+        </div>
+      </div>
+      <div class="section-body" id="body-education">
+        <div class="puzzle-gate" id="gate-education">
+          <h3>🔐 FILE ENCRYPTED — CIPHER PUZZLE</h3>
+          <p>Decode the message to unlock Richard's education records.</p>
+          <p style="margin-bottom:4px; font-size:11px; color:#8a7a5a;">A Caesar cipher with shift 3. Each letter is shifted 3 positions forward.</p>
+          <div class="cipher-display" id="cipher-text">HQFUBSWHG: XQLYHUVLWB RI FDOLIRUQLD, VDQWD EDUEDU</div>
+          <p style="font-size:11px; color:#8a7a5a; margin: 8px 0;">Decode the above. Type the university name:</p>
+          <input class="cipher-input" id="cipher-input" placeholder="TYPE YOUR ANSWER..." maxlength="40"
+            oninput="checkCipher(this.value)"
+            onkeypress="if(event.key==='Enter') checkCipher(this.value)">
+          <div id="cipher-feedback" style="font-family:'Courier Prime',monospace; font-size:12px; margin-top:8px; color:#6a5a3a; font-style:italic;"></div>
+          <button class="btn-primary" style="margin-top:16px; font-size:14px;" onclick="checkCipher(document.getElementById('cipher-input').value)">DECODE</button>
+        </div>
+        <div id="content-education" style="display:none;">
+          <div class="stamp" style="top:40px; right:40px;">VERIFIED</div>
+          <div class="entry-card">
+            <div class="entry-title">University of California, Santa Barbara</div>
+            <div class="entry-meta">B.S. STATISTICS AND DATA SCIENCE // GPA: 3.82 // EXPECTED: JUNE 2026</div>
+            <div class="entry-body">
+              <strong>College of Letters and Science</strong><br><br>
+              Relevant Coursework:
+              <ul>
+                <li>Probability and Statistics</li>
+                <li>Stochastic Processes</li>
+                <li>Bayesian Data Analysis</li>
+                <li>Regression Analysis</li>
+                <li>Statistical Machine Learning</li>
+                <li>Advanced Statistical Modeling</li>
+                <li>Computational Methods in Statistics</li>
+              </ul>
+            </div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">UCSB — Professional & Continuing Education (PACE)</div>
+            <div class="entry-meta">PROJECT MANAGEMENT CERTIFICATE // JUNE 2026</div>
+            <div class="entry-body">Applied Agile and project management methodologies, demonstrated through real team-lead roles in academic projects.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== EXPERIENCE SECTION ====== -->
+    <div class="case-section" id="section-experience">
+      <div class="section-header">
+        <div class="section-title">
+          💼 FIELD OPERATIONS
+          <span class="section-badge" id="badge-experience">LOCKED</span>
+        </div>
+      </div>
+      <div class="section-body" id="body-experience">
+        <div class="puzzle-gate" id="gate-experience">
+          <h3>🔐 FILE ENCRYPTED — CRACK THE CODE WORD</h3>
+          <p>Guess the 5-letter data science word. Each correct letter reveals intel. <strong style="color:var(--red)">5 attempts</strong> before the file self-destructs.</p>
+          <div id="wordle-board" style="display:flex;flex-direction:column;gap:6px;align-items:center;margin:16px 0;"></div>
+          <div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:8px;">
+            <input id="wordle-input" class="cipher-input" style="max-width:180px;font-size:22px;letter-spacing:0.3em;text-transform:uppercase;" maxlength="5" placeholder="?????" autocomplete="off" onkeydown="if(event.key==='Enter')submitWordle()">
+            <button class="btn-primary" style="font-size:13px;padding:12px 20px;" onclick="submitWordle()">SUBMIT</button>
+          </div>
+          <div id="wordle-keyboard" style="display:flex;flex-direction:column;gap:5px;align-items:center;margin-top:8px;"></div>
+          <div id="wordle-feedback" style="font-family:'Courier Prime',monospace;font-size:12px;margin-top:10px;color:#6a5a3a;font-style:italic;text-align:center;"></div>
+          <div id="wordle-hint" style="font-family:'Courier Prime',monospace;font-size:11px;margin-top:6px;color:#4a3a2a;text-align:center;"></div>
+        </div>
+        <div id="content-experience" style="display:none;">
+          <div class="stamp" style="top:40px; right:40px;">CONFIRMED</div>
+          <div class="entry-card">
+            <div class="entry-title">TellCo Europe Sagl Switzerland — Business Analyst Intern</div>
+            <div class="entry-meta">AGNO, TICINO, SWITZERLAND // NOV 2024 – AUG 2025</div>
+            <div class="entry-body"><ul>
+              <li>Developed Python ETL pipelines and SQL queries (JOINs, CTEs) to analyze 120,000+ customer records — reduced manual reporting time by <strong>30%</strong>.</li>
+              <li>Designed A/B tests using chi-square tests (p &lt; 0.05) contributing to <strong>10% lift</strong> in campaign engagement.</li>
+              <li>Mentored 5+ interns on Python analytics and ETL workflows.</li>
+            </ul></div>
+            <div class="skill-tags"><span class="skill-tag">Python</span><span class="skill-tag">SQL</span><span class="skill-tag">ETL</span><span class="skill-tag">A/B Testing</span><span class="skill-tag">Chi-square</span></div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">42robotsAI — AI/Machine Learning Intern</div>
+            <div class="entry-meta">DALLAS, TX // APR 2024 – AUG 2024</div>
+            <div class="entry-body"><ul>
+              <li>Built Random Forest diagnostic classifier on 50,000+ healthcare records — achieved <strong>0.85 ROC-AUC</strong>, 10% accuracy improvement over baseline.</li>
+              <li>Developed anomaly detection models on healthcare claims to flag billing inconsistencies.</li>
+              <li>Evaluated medical AI chatbot outputs and designed iterative testing frameworks to reduce hallucinations.</li>
+            </ul></div>
+            <div class="skill-tags"><span class="skill-tag">Random Forest</span><span class="skill-tag">scikit-learn</span><span class="skill-tag">NLP</span><span class="skill-tag">Healthcare ML</span></div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">City of Newark — Economic Development Intern</div>
+            <div class="entry-meta">NEWARK, CA // AUG 2022 – DEC 2023</div>
+            <div class="entry-body"><ul>
+              <li>Queried and analyzed 5,000+ business records using SQL to identify underrepresented communities.</li>
+              <li>Conducted A/B testing on outreach campaigns (p ≈ 0.07) to improve messaging effectiveness.</li>
+              <li>Built automated dashboards in Python (Plotly, Streamlit) for City Council presentations.</li>
+            </ul></div>
+            <div class="skill-tags"><span class="skill-tag">SQL</span><span class="skill-tag">Plotly</span><span class="skill-tag">Streamlit</span><span class="skill-tag">Policy Analytics</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PROJECTS SECTION ====== -->
+    <div class="case-section" id="section-projects">
+      <div class="section-header">
+        <div class="section-title">
+          🔬 CASE INVESTIGATIONS
+          <span class="section-badge" id="badge-projects">LOCKED</span>
+        </div>
+      </div>
+      <div class="section-body" id="body-projects">
+        <div class="puzzle-gate" id="gate-projects">
+          <h3>🔐 FILE ENCRYPTED — SPOT THE BUG</h3>
+          <p>Richard left a bug in each code snippet. Click the <strong>line</strong> that contains the logical error to crack the file. <span style="color:var(--gold)">3 bugs total.</span></p>
+          <div id="bug-game" style="margin:16px 0;"></div>
+          <div id="bug-feedback" style="font-family:'Courier Prime',monospace;font-size:12px;margin-top:8px;color:#6a5a3a;font-style:italic;text-align:center;"></div>
+        </div>
+        <div id="content-projects" style="display:none;">
+          <div class="stamp" style="top:40px; right:40px;">SOLVED</div>
+          <div class="entry-card">
+            <div class="entry-title">Google Web Graph — Social Network Analysis</div>
+            <div class="entry-meta">PROJECT MANAGER // GITHUB</div>
+            <div class="entry-body">
+              Served as Project Manager, delivering all team deliverables ahead of schedule. Diagnosed zero-edge subgraph issue in sparse 875,000+ node graph and implemented a Random Walk algorithm to generate connected 200-node subgraphs. Visualized using FR, Kamada-Kawai, and MDS layouts.
+            </div>
+            <div class="skill-tags"><span class="skill-tag">igraph</span><span class="skill-tag">Random Walk</span><span class="skill-tag">Network Analysis</span><span class="skill-tag">Python</span></div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">PBC Survival Risk Analysis</div>
+            <div class="entry-meta">AGILE LEAD // GITHUB</div>
+            <div class="entry-body">
+              Led Agile team to build survival analysis system in R using Cox regression, Kaplan-Meier estimators, and competing risk models. Validated via residual diagnostics and time-dependent ROC analysis. Managed sprint cycles and professor reviews.
+            </div>
+            <div class="skill-tags"><span class="skill-tag">R</span><span class="skill-tag">Cox Regression</span><span class="skill-tag">Kaplan-Meier</span><span class="skill-tag">Agile</span><span class="skill-tag">ROC Analysis</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SKILLS SECTION ====== -->
+    <div class="case-section" id="section-skills">
+      <div class="section-header">
+        <div class="section-title">
+          🛠️ ARSENAL
+          <span class="section-badge" id="badge-skills">LOCKED</span>
+        </div>
+      </div>
+      <div class="section-body" id="body-skills">
+        <div class="puzzle-gate" id="gate-skills">
+          <h3>🔐 FILE ENCRYPTED — MEMORY MATCH</h3>
+          <p>Find all matching pairs of Richard's tools to unlock his skills inventory.</p>
+          <div class="memory-grid" id="memory-grid" style="grid-template-columns: repeat(4,1fr);"></div>
+          <div id="memory-feedback" style="font-family:'Courier Prime',monospace; font-size:12px; margin-top:12px; color:#6a5a3a; font-style:italic; text-align:center;"></div>
+        </div>
+        <div id="content-skills" style="display:none;">
+          <div class="stamp" style="top:40px; right:40px;">UNLOCKED</div>
+          <div class="entry-card">
+            <div class="entry-title">Programming Languages</div>
+            <div class="skill-tags"><span class="skill-tag">Python</span><span class="skill-tag">R</span><span class="skill-tag">SQL</span><span class="skill-tag">Java</span><span class="skill-tag">SAS</span><span class="skill-tag">Excel</span></div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">Data Analysis & Machine Learning</div>
+            <div class="skill-tags"><span class="skill-tag">pandas</span><span class="skill-tag">NumPy</span><span class="skill-tag">scikit-learn</span><span class="skill-tag">SciPy</span><span class="skill-tag">igraph</span></div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">Visualization</div>
+            <div class="skill-tags"><span class="skill-tag">Streamlit</span><span class="skill-tag">Dash</span><span class="skill-tag">Shiny</span><span class="skill-tag">Plotly</span><span class="skill-tag">ggplot2</span><span class="skill-tag">Seaborn</span><span class="skill-tag">Matplotlib</span></div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">Statistical Methods</div>
+            <div class="skill-tags"><span class="skill-tag">Regression</span><span class="skill-tag">Random Forest</span><span class="skill-tag">K-Means</span><span class="skill-tag">Naive Bayes</span><span class="skill-tag">K-NN</span><span class="skill-tag">Survival Analysis</span><span class="skill-tag">A/B Testing</span><span class="skill-tag">Monte Carlo</span></div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-title">Tools & Platforms</div>
+            <div class="skill-tags"><span class="skill-tag">Git</span><span class="skill-tag">REST APIs</span><span class="skill-tag">Data Warehousing</span><span class="skill-tag">KPI Dashboards</span><span class="skill-tag">ETL Pipelines</span><span class="skill-tag">SQL (CTEs, JOINs)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /case-content -->
+</div><!-- /main-screen -->
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<script>
+// ============================
+// STATE
+// ============================
+const unlocked = { education: false, experience: false, projects: false, skills: false };
+let solvedCount = 0;
+
+// ============================
+// SCREENS
+// ============================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startPuzzle() {
+  showScreen('puzzle-screen');
+  initPuzzle();
+}
+
+// ============================
+// PUZZLE (PHOTO JIGSAW)
+// ============================
+let pieceSize = 120;
+const GRID = 3;
+let pieces = [];
+let dragSrcIdx = null;
+
+function initPuzzle() {
+  // Generate a stylized "photo" using canvas (since we can't use a real photo)
+  const container = document.getElementById('puzzle-container');
+  container.style.gridTemplateColumns = `repeat(${GRID}, ${pieceSize}px)`;
+  container.innerHTML = '';
+
+  // Create the full image on an offscreen canvas
+  const fullCanvas = document.createElement('canvas');
+  fullCanvas.width = pieceSize * GRID;
+  fullCanvas.height = pieceSize * GRID;
+  const ctx = fullCanvas.getContext('2d');
+
+  // Draw stylized portrait
+  drawPortrait(ctx, pieceSize * GRID);
+
+  // Create scrambled order
+  const order = [...Array(GRID * GRID).keys()];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+
+  // Make sure it's actually scrambled
+  while (order.every((v, i) => v === i)) {
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+  }
+
+  pieces = order.map((srcIdx, slotIdx) => ({
+    srcIdx,    // which image tile this piece shows
+    slotIdx,   // current slot position
+    correct: srcIdx === slotIdx
+  }));
+
+  pieces.forEach((piece, i) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'puzzle-piece';
+    wrapper.style.width = pieceSize + 'px';
+    wrapper.style.height = pieceSize + 'px';
+    wrapper.dataset.slot = i;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = pieceSize;
+    canvas.height = pieceSize;
+    const pctx = canvas.getContext('2d');
+
+    // Draw the correct slice
+    const col = piece.srcIdx % GRID;
+    const row = Math.floor(piece.srcIdx / GRID);
+    pctx.drawImage(fullCanvas,
+      col * pieceSize, row * pieceSize, pieceSize, pieceSize,
+      0, 0, pieceSize, pieceSize
+    );
+
+    wrapper.appendChild(canvas);
+    wrapper.draggable = true;
+
+    wrapper.addEventListener('dragstart', e => {
+      dragSrcIdx = i;
+      wrapper.classList.add('dragging');
+    });
+    wrapper.addEventListener('dragend', () => wrapper.classList.remove('dragging'));
+    wrapper.addEventListener('dragover', e => e.preventDefault());
+    wrapper.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrcIdx !== null && dragSrcIdx !== i) {
+        swapPieces(dragSrcIdx, i);
+      }
+    });
+
+    container.appendChild(wrapper);
+  });
+
+  updatePuzzleProgress();
+}
+
+function drawPortrait(ctx, size) {
+  // Background
+  ctx.fillStyle = '#2a1f10';
+  ctx.fillRect(0, 0, size, size);
+
+  // Grid lines for texture
+  ctx.strokeStyle = '#1a1208';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < size; i += 20) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, size); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(size, i); ctx.stroke();
+  }
+
+  // Vignette
+  const grad = ctx.createRadialGradient(size/2, size/2, size*0.2, size/2, size/2, size*0.75);
+  grad.addColorStop(0, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.7)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+
+  // Body / suit
+  ctx.fillStyle = '#1a1208';
+  ctx.beginPath();
+  ctx.ellipse(size/2, size*0.85, size*0.32, size*0.28, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Collar/shirt
+  ctx.fillStyle = '#f0e8d0';
+  ctx.beginPath();
+  ctx.moveTo(size/2 - 30, size*0.68);
+  ctx.lineTo(size/2, size*0.78);
+  ctx.lineTo(size/2 + 30, size*0.68);
+  ctx.fill();
+
+  // Tie
+  ctx.fillStyle = '#c0392b';
+  ctx.beginPath();
+  ctx.moveTo(size/2 - 8, size*0.68);
+  ctx.lineTo(size/2, size*0.82);
+  ctx.lineTo(size/2 + 8, size*0.68);
+  ctx.fill();
+
+  // Neck
+  ctx.fillStyle = '#c8a06a';
+  ctx.beginPath();
+  ctx.ellipse(size/2, size*0.63, 16, 18, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Head
+  ctx.fillStyle = '#c8a06a';
+  ctx.beginPath();
+  ctx.ellipse(size/2, size*0.42, size*0.2, size*0.22, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Hair
+  ctx.fillStyle = '#1a0f05';
+  ctx.beginPath();
+  ctx.ellipse(size/2, size*0.29, size*0.2, size*0.1, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(size/2 - size*0.17, size*0.38, size*0.06, size*0.12, -0.3, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(size/2 + size*0.17, size*0.38, size*0.06, size*0.12, 0.3, 0, Math.PI*2);
+  ctx.fill();
+
+  // Eyes
+  ctx.fillStyle = '#1a1208';
+  ctx.beginPath(); ctx.ellipse(size/2 - 22, size*0.41, 9, 6, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(size/2 + 22, size*0.41, 9, 6, 0, 0, Math.PI*2); ctx.fill();
+
+  // Eye shine
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(size/2 - 19, size*0.40, 3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(size/2 + 25, size*0.40, 3, 0, Math.PI*2); ctx.fill();
+
+  // Nose
+  ctx.strokeStyle = '#a07040';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(size/2, size*0.43);
+  ctx.lineTo(size/2 - 6, size*0.50);
+  ctx.lineTo(size/2 + 6, size*0.50);
+  ctx.stroke();
+
+  // Mouth
+  ctx.strokeStyle = '#8a5030';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(size/2, size*0.54, 14, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+
+  // Photo frame / border
+  ctx.strokeStyle = '#b8860b';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, size-6, size-6);
+
+  // "RZ" watermark
+  ctx.fillStyle = 'rgba(184,134,11,0.15)';
+  ctx.font = `bold ${size*0.4}px 'Bebas Neue', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('RZ', size/2, size/2);
+
+  // Bottom label
+  ctx.fillStyle = 'rgba(240,232,208,0.8)';
+  ctx.font = `${size*0.045}px 'Courier Prime', monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillText('SUBJECT: R. ZHANG // CASE #RZ-2026', size/2, size - 10);
+}
+
+function swapPieces(idxA, idxB) {
+  const container = document.getElementById('puzzle-container');
+  const children = Array.from(container.children);
+
+  [pieces[idxA].srcIdx, pieces[idxB].srcIdx] = [pieces[idxB].srcIdx, pieces[idxA].srcIdx];
+
+  pieces.forEach((piece, i) => {
+    piece.correct = piece.srcIdx === i;
+  });
+
+  // Re-render
+  const fullCanvas = document.createElement('canvas');
+  fullCanvas.width = pieceSize * GRID;
+  fullCanvas.height = pieceSize * GRID;
+  const ctx = fullCanvas.getContext('2d');
+  drawPortrait(ctx, pieceSize * GRID);
+
+  pieces.forEach((piece, i) => {
+    const wrapper = children[i];
+    const canvas = wrapper.querySelector('canvas');
+    const pctx = canvas.getContext('2d');
+    pctx.clearRect(0, 0, pieceSize, pieceSize);
+    const col = piece.srcIdx % GRID;
+    const row = Math.floor(piece.srcIdx / GRID);
+    pctx.drawImage(fullCanvas, col*pieceSize, row*pieceSize, pieceSize, pieceSize, 0, 0, pieceSize, pieceSize);
+
+    wrapper.className = 'puzzle-piece' + (piece.correct ? ' correct' : '');
+  });
+
+  updatePuzzleProgress();
+}
+
+function updatePuzzleProgress() {
+  const correct = pieces.filter(p => p.correct).length;
+  document.getElementById('puzzle-progress').textContent = `${correct} / ${GRID*GRID} pieces placed correctly`;
+  if (correct === GRID * GRID) {
+    setTimeout(() => {
+      document.getElementById('puzzle-progress').textContent = '✅ IDENTITY VERIFIED — ACCESS GRANTED';
+      document.getElementById('puzzle-progress').style.color = '#4a8a4a';
+      setTimeout(() => {
+        showMain();
+      }, 1200);
+    }, 400);
+  }
+}
+
+function showMain() {
+  showScreen('main-screen');
+  showNotification('🗂️ Case file opened. Solve each puzzle to reveal classified intel.', 'success');
+}
+
+// ============================
+// NAVIGATION
+// ============================
+let currentSection = 'profile';
+
+function showSection(name) {
+  document.querySelectorAll('.case-section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  const section = document.getElementById('section-' + name);
+  if (section) section.classList.add('visible');
+
+  const tab = document.getElementById('tab-' + name) || document.querySelector(`.nav-tab[onclick="showSection('${name}')"]`);
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.textContent.toLowerCase().includes(name.replace('🔒 ',''))) t.classList.add('active');
+  });
+  currentSection = name;
+}
+
+function tryTab(name) {
+  if (unlocked[name]) {
+    showSection(name);
+    // Update tabs
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    const tab = document.getElementById('tab-' + name);
+    if (tab) tab.classList.add('active');
+  } else {
+    showNotification(`🔒 "${name.toUpperCase()}" is locked. Navigate to it and solve the puzzle.`, 'error');
+    // Scroll to section
+    const section = document.getElementById('section-' + name);
+    if (section) {
+      section.classList.add('visible');
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}
+
+// ============================
+// UNLOCK SECTION
+// ============================
+function unlockSection(name) {
+  if (unlocked[name]) return;
+  unlocked[name] = true;
+  solvedCount++;
+
+  const gate = document.getElementById('gate-' + name);
+  const content = document.getElementById('content-' + name);
+  const badge = document.getElementById('badge-' + name);
+  const tab = document.getElementById('tab-' + name);
+
+  if (gate) gate.style.display = 'none';
+  if (content) { content.style.display = 'block'; content.classList.add('success-flash'); }
+  if (badge) { badge.textContent = 'DECLASSIFIED'; badge.style.color = '#4a8a4a'; badge.style.borderColor = '#4a8a4a'; }
+  if (tab) { tab.classList.remove('locked'); tab.textContent = name.charAt(0).toUpperCase() + name.slice(1); }
+
+  // Update progress
+  const pct = (solvedCount / 4) * 100;
+  document.getElementById('solve-progress').style.width = pct + '%';
+
+  showNotification(`🔓 "${name.toUpperCase()}" file declassified! ${4 - solvedCount} remaining.`, 'success');
+
+  if (solvedCount === 4) {
+    setTimeout(() => showNotification('🏆 ALL FILES DECLASSIFIED — Case solved, detective!', 'success'), 2000);
+  }
+}
+
+// ============================
+// PUZZLE 1: CIPHER (EDUCATION)
+// ============================
+function checkCipher(val) {
+  const clean = val.trim().toLowerCase().replace(/[^a-z\s]/g, '');
+  const targets = ['university of california santa barbara', 'uc santa barbara', 'ucsb', 'university of california', 'santa barbara'];
+  const match = targets.some(t => clean.includes(t.toLowerCase()));
+  const feedback = document.getElementById('cipher-feedback');
+
+  if (match) {
+    feedback.textContent = '✅ Correct! Decoding complete...';
+    feedback.style.color = '#4a8a4a';
+    setTimeout(() => unlockSection('education'), 600);
+  } else if (val.length > 2) {
+    feedback.textContent = '❌ Not quite. Remember: each letter shifted 3 forward. A→D, B→E...';
+    feedback.style.color = 'var(--red)';
+  }
+}
+
+// ============================
+// PUZZLE 2: WORDLE (EXPERIENCE)
+// ============================
+const WORDLE_WORDS = ['QUERY','MODEL','PIVOT','TRAIN','STACK','AGENT','NUMPY','CLEAN','PARSE','LEARN'];
+const WORDLE_HINTS = [
+  'SQL uses this to ask for data',
+  'A trained ML predictor',
+  'Rotate data in a table view',
+  'What you do to a model on data',
+  'Layers of tech: the ___ overflow',
+  'An AI that acts autonomously',
+  'Python array library (abbr.)',
+  'Step 1 of every data pipeline',
+  'Read and process raw text/data',
+  'What neural networks do over time'
+];
+let wTarget = '';
+let wHint = '';
+let wGuesses = [];
+let wMaxGuesses = 5;
+let wDone = false;
+
+function initWordle() {
+  const idx = Math.floor(Math.random() * WORDLE_WORDS.length);
+  wTarget = WORDLE_WORDS[idx];
+  wHint = WORDLE_HINTS[idx];
+  wGuesses = [];
+  wDone = false;
+
+  renderWordleBoard();
+  renderWordleKeyboard();
+  document.getElementById('wordle-feedback').textContent = '';
+  document.getElementById('wordle-hint').textContent = `💡 Hint: ${wHint}`;
+  const inp = document.getElementById('wordle-input');
+  if (inp) { inp.value = ''; inp.disabled = false; inp.focus(); }
+}
+
+function renderWordleBoard() {
+  const board = document.getElementById('wordle-board');
+  if (!board) return;
+  board.innerHTML = '';
+  for (let r = 0; r < wMaxGuesses; r++) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:5px;';
+    for (let c = 0; c < 5; c++) {
+      const cell = document.createElement('div');
+      cell.style.cssText = `width:46px;height:46px;border:2px solid;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;font-weight:bold;transition:background 0.3s;`;
+      if (r < wGuesses.length) {
+        const guess = wGuesses[r];
+        const letter = guess[c];
+        const result = scoreWordle(guess)[c];
+        cell.textContent = letter;
+        if (result === 2) { cell.style.background = '#4a8a4a'; cell.style.color = '#f0e8d0'; cell.style.borderColor = '#4a8a4a'; }
+        else if (result === 1) { cell.style.background = '#b8860b'; cell.style.color = '#f0e8d0'; cell.style.borderColor = '#b8860b'; }
+        else { cell.style.background = '#3a2a1a'; cell.style.color = '#8a7a5a'; cell.style.borderColor = '#3a2a1a'; }
+      } else {
+        cell.style.borderColor = r === wGuesses.length ? '#b8860b' : '#3a2a1a';
+        cell.style.color = 'var(--ink)';
+        cell.style.background = '#faf6ec';
+      }
+      row.appendChild(cell);
+    }
+    board.appendChild(row);
+  }
+}
+
+function scoreWordle(guess) {
+  // Returns array: 2=correct, 1=wrong pos, 0=not in word
+  const result = [0,0,0,0,0];
+  const remaining = wTarget.split('');
+  // First pass: exact
+  for (let i = 0; i < 5; i++) {
+    if (guess[i] === wTarget[i]) { result[i] = 2; remaining[i] = null; }
+  }
+  // Second pass: present
+  for (let i = 0; i < 5; i++) {
+    if (result[i] === 2) continue;
+    const j = remaining.indexOf(guess[i]);
+    if (j !== -1) { result[i] = 1; remaining[j] = null; }
+  }
+  return result;
+}
+
+function renderWordleKeyboard() {
+  const kb = document.getElementById('wordle-keyboard');
+  if (!kb) return;
+  kb.innerHTML = '';
+  const rows = ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+  // Build letter state map
+  const state = {};
+  wGuesses.forEach(g => {
+    const s = scoreWordle(g);
+    g.split('').forEach((l, i) => {
+      if (s[i] === 2) state[l] = 2;
+      else if (s[i] === 1 && state[l] !== 2) state[l] = 1;
+      else if (!state[l]) state[l] = 0;
+    });
+  });
+  rows.forEach(row => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;gap:4px;';
+    row.split('').forEach(letter => {
+      const btn = document.createElement('div');
+      btn.textContent = letter;
+      btn.style.cssText = `width:28px;height:32px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;cursor:pointer;border:1px solid;transition:all 0.2s;user-select:none;`;
+      const s = state[letter];
+      if (s === 2) { btn.style.background='#4a8a4a'; btn.style.color='#f0e8d0'; btn.style.borderColor='#4a8a4a'; }
+      else if (s === 1) { btn.style.background='#b8860b'; btn.style.color='#f0e8d0'; btn.style.borderColor='#b8860b'; }
+      else if (s === 0) { btn.style.background='#2a1a0a'; btn.style.color='#4a3a2a'; btn.style.borderColor='#2a1a0a'; }
+      else { btn.style.background='#faf6ec'; btn.style.color='var(--ink)'; btn.style.borderColor='var(--aged)'; }
+      btn.onclick = () => {
+        const inp = document.getElementById('wordle-input');
+        if (inp && !wDone && inp.value.length < 5) inp.value += letter;
+      };
+      div.appendChild(btn);
+    });
+    kb.appendChild(div);
+  });
+}
+
+function submitWordle() {
+  if (wDone) return;
+  const inp = document.getElementById('wordle-input');
+  const guess = (inp.value || '').toUpperCase().replace(/[^A-Z]/g,'');
+  const feedback = document.getElementById('wordle-feedback');
+  if (guess.length !== 5) { feedback.textContent = '❌ Must be exactly 5 letters.'; feedback.style.color='var(--red)'; return; }
+
+  wGuesses.push(guess);
+  inp.value = '';
+  renderWordleBoard();
+  renderWordleKeyboard();
+
+  if (guess === wTarget) {
+    wDone = true;
+    feedback.textContent = `✅ CRACKED! The word was ${wTarget}. Unlocking experience files...`;
+    feedback.style.color = '#4a8a4a';
+    inp.disabled = true;
+    setTimeout(() => unlockSection('experience'), 800);
+  } else if (wGuesses.length >= wMaxGuesses) {
+    wDone = true;
+    feedback.textContent = `❌ File self-destructed. The word was "${wTarget}". Reload to try again.`;
+    feedback.style.color = 'var(--red)';
+    inp.disabled = true;
+    // Give them a retry button
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'btn-primary';
+    retryBtn.textContent = 'TRY NEW WORD';
+    retryBtn.style.cssText = 'margin-top:12px;font-size:13px;display:block;margin-left:auto;margin-right:auto;';
+    retryBtn.onclick = initWordle;
+    document.getElementById('wordle-hint').appendChild(retryBtn);
+  } else {
+    const remaining = wMaxGuesses - wGuesses.length;
+    feedback.textContent = `${remaining} attempt${remaining===1?'':'s'} remaining...`;
+    feedback.style.color = '#6a5a3a';
+  }
+}
+
+// ============================
+// PUZZLE 3: SPOT THE BUG (PROJECTS)
+// ============================
+const bugChallenges = [
+  {
+    title: 'Bug #1 — Off-by-one in a loop',
+    lines: [
+      { code: 'data = [10, 20, 30, 40, 50]', bug: false },
+      { code: 'total = 0', bug: false },
+      { code: 'for i in range(1, len(data)):', bug: true, explain: '🐛 range(1, ...) skips index 0! Should be range(0, len(data)) or just range(len(data)).' },
+      { code: '    total += data[i]', bug: false },
+      { code: 'print(total)  # Expected 150', bug: false },
+    ]
+  },
+  {
+    title: 'Bug #2 — Wrong comparison operator',
+    lines: [
+      { code: 'def is_adult(age):', bug: false },
+      { code: '    if age = 18:', bug: true, explain: '🐛 Single = is assignment, not comparison. Should be == 18 or >= 18.' },
+      { code: '        return True', bug: false },
+      { code: '    return False', bug: false },
+      { code: 'print(is_adult(20))', bug: false },
+    ]
+  },
+  {
+    title: 'Bug #3 — Dividing instead of multiplying',
+    lines: [
+      { code: 'def percent_change(old, new_val):', bug: false },
+      { code: '    change = new_val - old', bug: false },
+      { code: '    return (change / old) / 100', bug: true, explain: '🐛 Dividing by 100 converts to a fraction, not a percentage! Should be * 100.' },
+      { code: '', bug: false },
+      { code: 'print(percent_change(50, 75))  # Expected 50.0', bug: false },
+    ]
+  }
+];
+
+let bugIdx = 0;
+let bugSolved = 0;
+
+function initBugGame() {
+  bugIdx = 0;
+  bugSolved = 0;
+  renderBugChallenge();
+}
+
+function renderBugChallenge() {
+  const container = document.getElementById('bug-game');
+  if (!container) return;
+  if (bugIdx >= bugChallenges.length) return;
+
+  const challenge = bugChallenges[bugIdx];
+  container.innerHTML = '';
+
+  const progress = document.createElement('div');
+  progress.style.cssText = 'font-family:"Courier Prime",monospace;font-size:11px;color:var(--gold);margin-bottom:10px;text-align:center;letter-spacing:0.1em;';
+  progress.textContent = `CHALLENGE ${bugIdx + 1} / ${bugChallenges.length} — Click the buggy line`;
+  container.appendChild(progress);
+
+  const titleEl = document.createElement('div');
+  titleEl.style.cssText = 'font-family:"Special Elite",serif;font-size:14px;color:var(--ink);margin-bottom:10px;text-align:center;';
+  titleEl.textContent = challenge.title;
+  container.appendChild(titleEl);
+
+  const codeBlock = document.createElement('div');
+  codeBlock.style.cssText = 'background:#1a1208;border:1px solid #3a2a1a;padding:4px 0;max-width:480px;margin:0 auto;';
+
+  challenge.lines.forEach((line, i) => {
+    const lineEl = document.createElement('div');
+    lineEl.style.cssText = `display:flex;align-items:stretch;cursor:${line.code ? 'pointer' : 'default'};transition:background 0.15s;`;
+
+    const lineNum = document.createElement('span');
+    lineNum.textContent = i + 1;
+    lineNum.style.cssText = 'min-width:32px;text-align:right;padding:8px 10px;font-family:"Courier Prime",monospace;font-size:12px;color:#4a3a2a;user-select:none;background:#0d0a05;border-right:1px solid #2a1a0a;flex-shrink:0;';
+
+    const codePart = document.createElement('span');
+    codePart.textContent = line.code || ' ';
+    codePart.style.cssText = 'padding:8px 14px;font-family:"Courier Prime",monospace;font-size:13px;color:#d4c4a0;flex:1;white-space:pre;';
+
+    lineEl.appendChild(lineNum);
+    lineEl.appendChild(codePart);
+
+    if (line.code) {
+      lineEl.addEventListener('mouseenter', () => { lineEl.style.background = 'rgba(184,134,11,0.1)'; });
+      lineEl.addEventListener('mouseleave', () => { lineEl.style.background = ''; });
+      lineEl.addEventListener('click', () => clickBugLine(line, lineEl, codeBlock));
+    }
+
+    codeBlock.appendChild(lineEl);
+  });
+
+  container.appendChild(codeBlock);
+}
+
+function clickBugLine(line, lineEl, codeBlock) {
+  const feedback = document.getElementById('bug-feedback');
+  if (line.bug) {
+    lineEl.style.background = 'rgba(74,138,74,0.25)';
+    lineEl.querySelector('span:last-child').style.color = '#a0d0a0';
+    feedback.style.color = '#4a8a4a';
+    feedback.textContent = line.explain;
+    bugSolved++;
+
+    // Disable all lines in this block
+    codeBlock.querySelectorAll('div').forEach(el => el.style.pointerEvents = 'none');
+
+    if (bugSolved >= bugChallenges.length) {
+      setTimeout(() => unlockSection('projects'), 800);
+    } else {
+      bugIdx++;
+      setTimeout(() => {
+        feedback.textContent = `✅ Found it! Loading next challenge...`;
+        setTimeout(renderBugChallenge, 1000);
+      }, 1200);
+    }
+  } else {
+    lineEl.style.background = 'rgba(192,57,43,0.2)';
+    feedback.textContent = '❌ That line looks fine. Keep looking...';
+    feedback.style.color = 'var(--red)';
+    setTimeout(() => { lineEl.style.background = ''; }, 600);
+  }
+}
+
+// ============================
+// PUZZLE 4: MEMORY MATCH (SKILLS)
+// ============================
+const memoryPairs = ['🐍', '📊', '🔬', '⚙️', '🗄️', '📈', '🤖', '🧮'];
+let memoryCards = [];
+let memoryFlipped = [];
+let memoryMatched = 0;
+let memoryLocked = false;
+
+function initMemory() {
+  const symbols = [...memoryPairs, ...memoryPairs];
+  for (let i = symbols.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [symbols[i], symbols[j]] = [symbols[j], symbols[i]];
+  }
+
+  const grid = document.getElementById('memory-grid');
+  grid.innerHTML = '';
+  memoryFlipped = [];
+  memoryMatched = 0;
+  memoryLocked = false;
+
+  memoryCards = symbols.map((sym, i) => {
+    const card = document.createElement('div');
+    card.className = 'memory-card';
+    card.dataset.idx = i;
+    card.dataset.sym = sym;
+    card.innerHTML = `
+      <div class="memory-card-inner">
+        <div class="card-front">?</div>
+        <div class="card-back">${sym}</div>
+      </div>
+    `;
+    card.onclick = () => flipCard(card);
+    grid.appendChild(card);
+    return card;
+  });
+}
+
+function flipCard(card) {
+  if (memoryLocked) return;
+  if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  if (memoryFlipped.length >= 2) return;
+
+  card.classList.add('flipped');
+  memoryFlipped.push(card);
+
+  if (memoryFlipped.length === 2) {
+    memoryLocked = true;
+    const [a, b] = memoryFlipped;
+    if (a.dataset.sym === b.dataset.sym) {
+      a.classList.add('matched'); b.classList.add('matched');
+      a.classList.remove('flipped'); b.classList.remove('flipped');
+      memoryMatched++;
+      memoryFlipped = [];
+      memoryLocked = false;
+      const remaining = memoryPairs.length - memoryMatched;
+      document.getElementById('memory-feedback').textContent = remaining > 0 ? `✅ Match! ${remaining} pairs left.` : '';
+      if (memoryMatched === memoryPairs.length) {
+        setTimeout(() => unlockSection('skills'), 600);
+      }
+    } else {
+      setTimeout(() => {
+        a.classList.remove('flipped'); b.classList.remove('flipped');
+        memoryFlipped = [];
+        memoryLocked = false;
+      }, 900);
+    }
+  }
+}
+
+// ============================
+// NOTIFICATION
+// ============================
+let notifTimeout;
+function showNotification(msg, type = '') {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.className = 'notification show' + (type ? ' ' + type : '');
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ============================
+// INIT
+// ============================
+window.onload = () => {
+  // Pre-init all puzzles
+  initWordle();
+  initBugGame();
+  initMemory();
+
+  // Show all sections (locked ones show puzzle gate)
+  ['education','experience','projects','skills'].forEach(name => {
+    document.getElementById('section-' + name).classList.add('visible');
+  });
+};
+</script>
+</body>
+</html>
