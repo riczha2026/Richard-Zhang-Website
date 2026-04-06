@@ -5,6 +5,7 @@ let pieceSize = 120;
 const GRID = 3;
 let pieces = [];
 let dragSrcIdx = null;
+let fullCanvasCache = null;
 
 function initPuzzle() {
   const container = document.getElementById('puzzle-container');
@@ -19,6 +20,7 @@ function initPuzzle() {
 
   // Load user's actual photo or draw portrait
   loadPortraitImage(ctx, pieceSize * GRID, () => {
+    fullCanvasCache = fullCanvas;
     createPuzzlePieces(fullCanvas, container);
   });
 }
@@ -38,20 +40,22 @@ function loadPortraitImage(ctx, size, callback) {
   img.src = 'images/photo.jpg';
 }
 
-function createPuzzlePieces(fullCanvas, container) {
-  // Create scrambled order
-  const order = [...Array(GRID * GRID).keys()];
-  for (let i = order.length - 1; i > 0; i--) {
+function shuffleArray(arr) {
+  // Fisher-Yates shuffle algorithm for better randomization
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+}
 
-  // Make sure it's actually scrambled
+function createPuzzlePieces(fullCanvas, container) {
+  // Create scrambled order - ensure it's actually scrambled
+  const order = [...Array(GRID * GRID).keys()];
+  shuffleArray(order);
+  
+  // Keep shuffling until we get a configuration that's different from the original
   while (order.every((v, i) => v === i)) {
-    for (let i = order.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [order[i], order[j]] = [order[j], order[i]];
-    }
+    shuffleArray(order);
   }
 
   pieces = order.map((srcIdx, slotIdx) => ({
@@ -199,31 +203,18 @@ function drawPortrait(ctx, size) {
 }
 
 function swapPieces(idxA, idxB) {
-  const container = document.getElementById('puzzle-container');
-  const children = Array.from(container.children);
-
+  // Swap the source indices
   [pieces[idxA].srcIdx, pieces[idxB].srcIdx] = [pieces[idxB].srcIdx, pieces[idxA].srcIdx];
 
+  // Update correct status
   pieces.forEach((piece, i) => {
     piece.correct = piece.srcIdx === i;
   });
 
-  const fullCanvas = document.createElement('canvas');
-  fullCanvas.width = pieceSize * GRID;
-  fullCanvas.height = pieceSize * GRID;
-  const ctx = fullCanvas.getContext('2d');
-  
-  // Reload the image to re-render pieces
-  const img = new Image();
-  img.onload = () => {
-    ctx.drawImage(img, 0, 0, pieceSize * GRID, pieceSize * GRID);
-    updatePiecesDisplay(children, fullCanvas);
-  };
-  img.onerror = () => {
-    drawPortrait(ctx, pieceSize * GRID);
-    updatePiecesDisplay(children, fullCanvas);
-  };
-  img.src = 'images/photo.jpg';
+  // Use cached canvas for better performance
+  const container = document.getElementById('puzzle-container');
+  const children = Array.from(container.children);
+  updatePiecesDisplay(children, fullCanvasCache);
 }
 
 function updatePiecesDisplay(children, fullCanvas) {
