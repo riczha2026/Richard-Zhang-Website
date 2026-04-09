@@ -14,11 +14,10 @@ function initWordle() {
 }
 
 function checkWordleGuess() {
-  const input = document.getElementById('wordle-input');
-  const guess = input.value.toUpperCase().trim();
+  const input = document.getElementById('wordle-input').value.toUpperCase();
   
-  if (guess.length !== 8) {
-    showNotification('Word must be 8 letters!', 'error');
+  if (input.length !== 7) {  // Change from 8 to 7
+    document.getElementById('wordle-feedback').textContent = '❌ Word must be 7 letters!';
     return;
   }
 
