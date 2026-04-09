@@ -1,7 +1,7 @@
 // ============================
 // PUZZLE 3: WORDLE (EXPERIENCE)
 // ============================
-let wordleWord = 'SOFTWARE';
+let wordleWord = 'ANALYST';
 let wordleAttempts = [];
 const wordleMaxGuesses = 6;
 
@@ -14,40 +14,59 @@ function initWordle() {
 }
 
 function checkWordleGuess() {
-  const input = document.getElementById('wordle-input').value.toUpperCase();
+  const input = document.getElementById('wordle-input');
+  const guess = input.value.toUpperCase().trim();
+  const feedbackEl = document.getElementById('wordle-feedback');
   
-  if (input.length !== 7) {  // Change from 8 to 7
-    document.getElementById('wordle-feedback').textContent = '❌ Word must be 7 letters!';
+  // Validation
+  if (!guess) {
+    feedbackEl.textContent = '❌ Please enter a word';
+    feedbackEl.style.color = '#e74c3c';
+    return;
+  }
+
+  if (guess.length !== 7) {
+    feedbackEl.textContent = '❌ Word must be 7 letters!';
+    feedbackEl.style.color = '#e74c3c';
     return;
   }
 
   if (wordleAttempts.includes(guess)) {
-    showNotification('Already guessed that!', 'error');
+    feedbackEl.textContent = '⚠️ Already guessed that word!';
+    feedbackEl.style.color = '#f39c12';
     return;
   }
 
   wordleAttempts.push(guess);
   
+  // Check if correct
   if (guess === wordleWord) {
-    document.getElementById('wordle-feedback').innerHTML = '✅ Correct! You solved it!';
-    document.getElementById('wordle-feedback').style.color = '#4a8a4a';
+    feedbackEl.innerHTML = '✅ CORRECT! Section unlocked!';
+    feedbackEl.style.color = '#27ae60';
     input.disabled = true;
     document.getElementById('wordle-submit').disabled = true;
     setTimeout(() => unlockSection('experience'), 600);
     return;
   }
 
+  // Display feedback
   const feedback = getWordleFeedback(guess);
   displayWordleAttempt(guess, feedback);
 
+  // Check if game over
   if (wordleAttempts.length >= wordleMaxGuesses) {
-    document.getElementById('wordle-feedback').innerHTML = `❌ Game over! The word was: <strong>${wordleWord}</strong>`;
-    document.getElementById('wordle-feedback').style.color = 'var(--red)';
+    feedbackEl.innerHTML = `❌ Game over! The word was: <strong>${wordleWord}</strong>`;
+    feedbackEl.style.color = '#c0392b';
     input.disabled = true;
     document.getElementById('wordle-submit').disabled = true;
     return;
   }
 
+  // Show remaining attempts
+  const remaining = wordleMaxGuesses - wordleAttempts.length;
+  feedbackEl.textContent = `❌ Wrong! ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
+  feedbackEl.style.color = '#e74c3c';
+  
   input.value = '';
   input.focus();
 }
@@ -65,33 +84,34 @@ function displayWordleAttempt(guess, feedback) {
   const row = document.createElement('div');
   row.style.display = 'flex';
   row.style.gap = '4px';
-  row.style.marginBottom = '4px';
+  row.style.marginBottom = '8px';
 
   feedback.forEach(({ letter, status }) => {
     const tile = document.createElement('div');
     tile.textContent = letter;
-    tile.style.width = '36px';
-    tile.style.height = '36px';
+    tile.style.width = '40px';
+    tile.style.height = '40px';
     tile.style.display = 'flex';
     tile.style.alignItems = 'center';
     tile.style.justifyContent = 'center';
     tile.style.fontFamily = '"Bebas Neue", sans-serif';
-    tile.style.fontSize = '16px';
+    tile.style.fontSize = '18px';
     tile.style.fontWeight = 'bold';
     tile.style.border = '2px solid var(--aged)';
+    tile.style.borderRadius = '4px';
     
     if (status === 'correct') {
-      tile.style.background = '#4a8a4a';
+      tile.style.background = '#27ae60';
       tile.style.color = '#fff';
-      tile.style.borderColor = '#4a8a4a';
+      tile.style.borderColor = '#27ae60';
     } else if (status === 'present') {
-      tile.style.background = '#b8860b';
+      tile.style.background = '#f39c12';
       tile.style.color = '#fff';
-      tile.style.borderColor = '#b8860b';
+      tile.style.borderColor = '#f39c12';
     } else {
-      tile.style.background = '#d0d0d0';
+      tile.style.background = '#bdc3c7';
       tile.style.color = '#666';
-      tile.style.borderColor = '#d0d0d0';
+      tile.style.borderColor = '#bdc3c7';
     }
     
     row.appendChild(tile);
@@ -99,3 +119,6 @@ function displayWordleAttempt(guess, feedback) {
 
   container.appendChild(row);
 }
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initWordle);
