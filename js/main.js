@@ -15,7 +15,7 @@ function showScreen(id) {
 
 function startPuzzle() {
   showScreen('puzzle-screen');
-  setTimeout(() => initPhotoP uzzle(), 100);
+  setTimeout(() => initPhotoPuzzle(), 100);
 }
 
 // ============================
