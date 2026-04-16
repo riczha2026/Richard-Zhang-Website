@@ -4,6 +4,7 @@
 let wordleWord = 'ANALYST';
 let wordleAttempts = [];
 const wordleMaxGuesses = 6;
+const wordleDefinition = 'A professional who examines data and information to draw conclusions';
 
 function initWordle() {
   const input = document.getElementById('wordle-input');
@@ -46,11 +47,11 @@ function checkWordleGuess() {
     input.disabled = true;
     document.getElementById('wordle-submit').disabled = true;
     
-    // Show custom popup
     showSuccessPopup(
-      '🔓 PUZZLE UNLOCKED',
-      'You have unlocked the next puzzle! Try to solve it to learn about the suspect\'s experience, projects, and technical arsenal.',
-      'EXPERIENCE'
+      '🎯 IDENTITY VERIFIED',
+      'You have unlocked the operational history and discovered the suspect\'s professional background and achievements.',
+      'EXPERIENCE',
+      '#27ae60'
     );
     
     setTimeout(() => unlockSection('experience'), 1000);
@@ -60,6 +61,13 @@ function checkWordleGuess() {
   // Display feedback
   const feedback = getWordleFeedback(guess);
   displayWordleAttempt(guess, feedback);
+
+  // Show hint after 2 attempts
+  if (wordleAttempts.length === 2) {
+    feedbackEl.innerHTML = `💡 <strong>Hint:</strong> ${wordleDefinition}`;
+    feedbackEl.style.color = '#3498db';
+    return;
+  }
 
   // Check if game over
   if (wordleAttempts.length >= wordleMaxGuesses) {
@@ -126,84 +134,6 @@ function displayWordleAttempt(guess, feedback) {
   });
 
   container.appendChild(row);
-}
-
-function showSuccessPopup(title, message, section) {
-  // Create overlay
-  const overlay = document.createElement('div');
-  overlay.style.position = 'fixed';
-  overlay.style.top = '0';
-  overlay.style.left = '0';
-  overlay.style.width = '100%';
-  overlay.style.height = '100%';
-  overlay.style.background = 'rgba(0, 0, 0, 0.7)';
-  overlay.style.display = 'flex';
-  overlay.style.alignItems = 'center';
-  overlay.style.justifyContent = 'center';
-  overlay.style.zIndex = '10000';
-  
-  // Create popup
-  const popup = document.createElement('div');
-  popup.style.background = '#f5f1e8';
-  popup.style.border = '3px solid #1a1208';
-  popup.style.borderRadius = '8px';
-  popup.style.padding = '30px';
-  popup.style.maxWidth = '500px';
-  popup.style.textAlign = 'center';
-  popup.style.fontFamily = '"Special Elite", cursive';
-  popup.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.3)';
-  
-  // Title
-  const titleEl = document.createElement('h2');
-  titleEl.textContent = title;
-  titleEl.style.color = '#27ae60';
-  titleEl.style.marginBottom = '15px';
-  titleEl.style.fontSize = '28px';
-  titleEl.style.fontWeight = 'bold';
-  
-  // Message
-  const messageEl = document.createElement('p');
-  messageEl.textContent = message;
-  messageEl.style.color = '#1a1208';
-  messageEl.style.marginBottom = '25px';
-  messageEl.style.fontSize = '16px';
-  messageEl.style.lineHeight = '1.6';
-  
-  // Section hint
-  const sectionEl = document.createElement('p');
-  sectionEl.textContent = `Next Section: ${section}`;
-  sectionEl.style.color = '#6a5a3a';
-  sectionEl.style.marginBottom = '25px';
-  sectionEl.style.fontSize = '14px';
-  sectionEl.style.fontStyle = 'italic';
-  
-  // Close button
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'CONTINUE';
-  closeBtn.style.padding = '12px 30px';
-  closeBtn.style.background = '#27ae60';
-  closeBtn.style.color = '#fff';
-  closeBtn.style.border = 'none';
-  closeBtn.style.borderRadius = '4px';
-  closeBtn.style.cursor = 'pointer';
-  closeBtn.style.fontFamily = '"Bebas Neue", sans-serif';
-  closeBtn.style.fontSize = '16px';
-  closeBtn.style.fontWeight = 'bold';
-  closeBtn.style.transition = 'background 0.3s';
-  
-  closeBtn.onmouseover = () => closeBtn.style.background = '#229954';
-  closeBtn.onmouseout = () => closeBtn.style.background = '#27ae60';
-  closeBtn.onclick = () => {
-    overlay.remove();
-  };
-  
-  popup.appendChild(titleEl);
-  popup.appendChild(messageEl);
-  popup.appendChild(sectionEl);
-  popup.appendChild(closeBtn);
-  overlay.appendChild(popup);
-  
-  document.body.appendChild(overlay);
 }
 
 // Initialize on page load
