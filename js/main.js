@@ -10,12 +10,24 @@ let solvedCount = 0;
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const screen = document.getElementById(id);
-  if (screen) screen.classList.add('active');
+  if (screen) {
+    screen.classList.add('active');
+    screen.style.display = 'block';
+  }
 }
 
 function startPuzzle() {
   showScreen('puzzle-screen');
-  setTimeout(() => initPhotoPuzzle(), 100);
+  setTimeout(() => {
+    if (typeof initPhotoPuzzle === 'function') {
+      initPhotoPuzzle();
+    }
+  }, 100);
+}
+
+function puzzleComplete() {
+  showScreen('main-screen');
+  showSection('profile');
 }
 
 // ============================
@@ -94,7 +106,6 @@ function unlockSection(name) {
   if (gate) gate.style.display = 'none';
   if (content) { 
     content.style.display = 'block'; 
-    if (content.classList) content.classList.add('success-flash'); 
   }
   if (badge) { 
     badge.textContent = 'DECLASSIFIED'; 
@@ -103,7 +114,6 @@ function unlockSection(name) {
   }
   if (tab) { 
     tab.classList.remove('locked'); 
-    tab.textContent = name.charAt(0).toUpperCase() + name.slice(1); 
   }
 
   // Update progress
@@ -253,13 +263,12 @@ style.textContent = `
     }
   }
   
-  @keyframes success-flash {
-    0% { background: rgba(39, 174, 96, 0.1); }
-    100% { background: transparent; }
+  .screen {
+    display: none;
   }
   
-  .success-flash {
-    animation: success-flash 0.6s ease !important;
+  .screen.active {
+    display: block;
   }
 `;
 document.head.appendChild(style);
@@ -268,12 +277,6 @@ document.head.appendChild(style);
 // INIT
 // ============================
 document.addEventListener('DOMContentLoaded', () => {
-  // Show main screen
-  showScreen('main-screen');
-  
-  // Show profile section initially
-  showSection('profile');
-  
-  // Initialize puzzle functions (they'll auto-init when needed)
-  // Removed pre-init of puzzles - they init when their gates are reached
+  // Show intro screen first
+  showScreen('intro-screen');
 });
